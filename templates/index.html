@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html land = 'uk'>
+    <head>
+        <meta charset="UTF-8">
+        <meta name = "viewport" content="width=device-width">
+        <title>Обробка файлів</title>
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    </head>
+    <body>
+        <h1>Work with file</h1>
+
+        <h2>Download file</h2>
+        <input type="file" id="fileinput" accept=".txt">
+        <button onclick="uploadFile()">Download</button>
+        <div id = "result"></div>
+
+        <h2>File list</h2>
+        <button onclick="listFiles()">Download</button>
+        <div id = "fileList"></div>
+
+        <h2>File content </h2>
+        <div id = "fileContent"></div>
+        <script>
+            function uploadFile() {
+                const fileinput = $('#fileinput')[0];          
+                if (!fileinput.files.length) {
+                    $('#result').html('<p class="error">Select file</p>').fadeIn();
+                }
+                const formData = new FormData();
+                formData.append('file', fileinput.files[0]);
+                s.ajax({
+                    url:'/upload/',
+                    type:'POST',
+                    contentType: false,
+                    data: formData
+                })
+            }
+        </script>
+
+    </body>
+</html>

@@ -1,0 +1,13 @@
+{% extends "admin/change_form.html" %}
+{% block extrastyle %}
+    <style>
+        .form-row {background-color: rgb(156, 145, 22); padding: 10px;}
+    </style>
+{% endblock %}
+{% block extrahead %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            alert('Welcome to the Coin editor form');
+        });
+    </script>
+{% endblock %}

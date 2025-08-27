@@ -1,0 +1,19 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block content %}
+<h1>Import CSV</h1>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <p>
+        <label for="id_csv_file">Select CSV file:</label>
+        <input type="file" name="csv_file" id="id_csv_file" accept=".csv">
+    </p>
+    <input type="submit" value="Upload CSV" class="default">
+</form>
+
+<p>
+    <a href="{% url 'admin:index' %}">Back to admin dashboard</a>
+</p>
+{% endblock %}

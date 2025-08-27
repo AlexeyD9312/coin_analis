@@ -1,0 +1,24 @@
+<h2>Manage users permissios</h2>
+
+<div>
+    <form method="get">
+        <label for="user_id">Chose user</label>
+        <select name = 'user_id' id="user_id" onchange="this.form.submit()">
+            <option value="">==Chose user==</option>
+            {%for user in users%}
+                <option value="{{ user.id }}" {% if user == selected_user %}select{% endif %}>{{ user.email }}</option>
+            {% endfor %}
+        </select>
+    </form>
+
+    {% if selected_user %}
+        <h3>Permissions for {{ selected_user.email }}</h3>
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name = 'user_id',
+            value="{{selected_user.id}}">
+            {{ form.permissions }}
+            <button type="submit">Save correction</button>
+        </form>
+    {% endif %}
+</div>
