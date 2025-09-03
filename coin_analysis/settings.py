@@ -11,9 +11,27 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'drf_application.auth.CustomJWTAuthentication'
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated'
+    ],
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(seconds = 60),
+    'REFRESH_TOKEN_LIFETIME': timedelta(minutes = 3),
+    'ROTATE_REFRESH_TOKEN': True,
+    'BLACKLIST_AFTER_ROTATION':True,
+}
+
 
 
 # Quick-start development settings - unsuitable for production
@@ -27,6 +45,13 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+JWT_CUSTOM = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(seconds = 60),
+    'REFRESH_TOKEN_LIFETIME': timedelta(minutes = 3),
+    'ALGORITHM': 'HS256',
+    'SECRET_KEY': SECRET_KEY,
+
+}
 
 # Application definition
 
@@ -37,8 +62,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_filters',
+    'rest_framework',
+    'rest_framework.authtoken',
     'coin_app',
-    'user_app'
+    'user_app',
+    'drf_application'
 ]
 
 MIDDLEWARE = [
@@ -132,3 +161,9 @@ AUTH_USER_MODEL = 'user_app.AdminUser'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT= BASE_DIR/ 'media'
+
+ALLOWED_ROLES = {
+    "admin": ["create", "update", "delete", "view"],
+    "manager": ["update", "view"],
+    "user": ["view"]
+}
