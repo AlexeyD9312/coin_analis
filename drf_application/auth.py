@@ -59,20 +59,46 @@ User = get_user_model()
     
 
 class CustomJWTAuthentication(BaseAuthentication):
+    """
+    Кастомная JWT аутентификация для DRF.
+    Проверяет заголовок Authorization: Bearer <access_token>
+    """
+
     def authenticate(self, request):
         auth_header = request.headers.get('Authorization')
-        if not auth_header or not auth_header.startswith('Bearer '):
-            raise AuthenticationFailed('Invalid auth header format, Must be "Bearer -Token-"')
-        
-        token = auth_header.split(' ')[1]
-        payload = decode_token(token)
 
-        if not payload or payload.get('type') != 'access':
-            raise AuthenticationFailed('Invalid or expired token')
-        
+        if not auth_header:
+            return None  # Без заголовка пропускаем, DRF проверит permissions
+
+        if not auth_header.startswith('Bearer '):
+            raise AuthenticationFailed(
+                'Invalid auth header format. Must be "Bearer <token>"'
+            )
+
+        token = auth_header.split(' ')[1]
+
+        # Декодируем токен через утилиту
+        payload = decode_token(token)
+        if not payload:
+            raise AuthenticationFailed('Invalid token')
+
+        # Проверяем, что это access токен
+        if payload.get('type') != 'access':
+            raise AuthenticationFailed('Invalid token type: must be access token')
+
+        # Проверяем срок действия токена
+        import time
+        exp = payload.get('exp')
+        if exp and time.time() > exp:
+            raise AuthenticationFailed('Token has expired')
+
+        # Получаем пользователя
         try:
-            user = User.objects.get(id = payload['user_id'])
+            user = User.objects.get(id=payload['user_id'])
         except User.DoesNotExist:
             raise AuthenticationFailed('User not found')
-        return(user, token)
 
+        return (user, token)  # DRF ожидает tuple (user, auth)
+
+    def authenticate_header(self, request):
+        return 'Bearer'

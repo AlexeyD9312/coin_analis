@@ -8,10 +8,10 @@ from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
 from .serializers import CoinInfoSerializers, CoinDataSerializers
 from coin_app.models import CoinInfo, CoinsData
-from drf_application.auth import LibJWTAythentication
+#from drf_application.auth import LibJWTAythentication
 from rest_framework.permissions import IsAuthenticated
 from .auth import CustomJWTAuthentication
-from .utils.jwt_custom import genarate_access_token, genarate_refresh_token, decode_token
+from .utils.jwt_custom import generate_access_token, generate_refresh_token, decode_token
 
 
 class CoinInfoViewSet(viewsets.ModelViewSet):
@@ -22,8 +22,8 @@ class CoinInfoViewSet(viewsets.ModelViewSet):
 
 
 class CoinsDataViewSet(viewsets.ModelViewSet):
-    #permission_classes = [AllowAny]
-    authentication_classes =[LibJWTAythentication]
+    permission_classes = [IsAuthenticated]
+    authentication_classes =[CustomJWTAuthentication]
     queryset = CoinsData.objects.all()
     serializer_class = CoinDataSerializers
     filter_backends = [DjangoFilterBackend]
@@ -44,30 +44,54 @@ class CoinsDataViewSet(viewsets.ModelViewSet):
     
 
 class CustomObtainAuthToken(APIView):
+    permission_classes = [AllowAny]  # публичный эндпоинт
 
-    def post(self,request):
-        username = request.data.get('username')
+    def post(self, request):
+        email = request.data.get('email')
         password = request.data.get('password')
-        user = authenticate(username=username, password = password)
-        if not user:
-            return Response({'error': 'Invallid credentional'}, status=400)
-        access_token = genarate_access_token(user.id)    
-        refresh_token = genarate_refresh_token(user.id) 
 
-        return Response({'access': access_token, 'refresh': refresh_token}) 
-    
+        if not email or not password:
+            return Response(
+                {'error': 'Email and password are required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        user = authenticate(username=email, password=password)
+        if not user:
+            return Response(
+                {'error': 'Invalid credentials'},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        access_token = generate_access_token(user.id)
+        refresh_token = generate_refresh_token(user.id)
+
+        return Response({'access': access_token, 'refresh': refresh_token})
+
+
 
 class CustomRefreshAuthToken(APIView):
+    permission_classes = [AllowAny]
 
-    def post(self,request):
-        refresh = request.data.get('refresh')
-        payload = decode_token(refresh)
+    def post(self, request):
+        refresh_token = request.data.get('refresh')
+        if not refresh_token:
+            return Response({'error': 'Refresh token is required'}, status=400)
 
-        if not payload or payload.get('type') !='refresh':
-            return Response({'detail': 'Invalid,expired refresh token'}, status=status.HTTP_401_UNAUTHORIZED)
-        
-        access = genarate_access_token(payload['user_id'])
-        return Response({'access': access})
+        payload = decode_token(refresh_token)
+        if not payload:
+            return Response({'error': 'Invalid token'}, status=401)
+
+        if payload.get('type') != 'refresh':
+            return Response({'error': 'Invalid token type'}, status=401)
+
+        user_id = payload.get('user_id')
+        if not user_id:
+            return Response({'error': 'Token has no user ID'}, status=401)
+
+        access_token = generate_access_token(user_id)
+        return Response({'access': access_token})
+
 
 
 class ProfileView(APIView):
@@ -75,4 +99,4 @@ class ProfileView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        return Response({'username': request.user.username})
+        return Response({'email': request.user.email})
