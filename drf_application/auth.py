@@ -68,7 +68,7 @@ class CustomJWTAuthentication(BaseAuthentication):
         auth_header = request.headers.get('Authorization')
 
         if not auth_header:
-            return None  # Без заголовка пропускаем, DRF проверит permissions
+            return None  # Без заголовку пропускаємо
 
         if not auth_header.startswith('Bearer '):
             raise AuthenticationFailed(
@@ -77,28 +77,27 @@ class CustomJWTAuthentication(BaseAuthentication):
 
         token = auth_header.split(' ')[1]
 
-        # Декодируем токен через утилиту
+        # Декодуємо токен
         payload = decode_token(token)
         if not payload:
             raise AuthenticationFailed('Invalid token')
 
-        # Проверяем, что это access токен
+        # Провірка access токен
         if payload.get('type') != 'access':
             raise AuthenticationFailed('Invalid token type: must be access token')
 
-        # Проверяем срок действия токена
+        # строк діі
         import time
         exp = payload.get('exp')
         if exp and time.time() > exp:
             raise AuthenticationFailed('Token has expired')
 
-        # Получаем пользователя
         try:
             user = User.objects.get(id=payload['user_id'])
         except User.DoesNotExist:
             raise AuthenticationFailed('User not found')
 
-        return (user, token)  # DRF ожидает tuple (user, auth)
+        return (user, token)  
 
     def authenticate_header(self, request):
         return 'Bearer'
