@@ -10,52 +10,52 @@ from django.conf import settings
 User = get_user_model()
 
 
-class LibJWTAythentication(BaseAuthentication):
-    def authenticate(self,request):
-        auth_header = request.headers.get('Authorization')
+# class LibJWTAythentication(BaseAuthentication):
+#     def authenticate(self,request):
+#         auth_header = request.headers.get('Authorization')
 
-        if not auth_header:
-            return None
+#         if not auth_header:
+#             return None
         
-        if not auth_header.startswith('Bearer '):
-            raise AuthenticationFailed('Invalid auth header format, Must be "Bearer -Token-"')
+#         if not auth_header.startswith('Bearer '):
+#             raise AuthenticationFailed('Invalid auth header format, Must be "Bearer -Token-"')
         
-        token = auth_header.split(' ')[1] #  base setting from custom auth
+#         token = auth_header.split(' ')[1] #  base setting from custom auth
 
-        try:
-            payload = jwt.decode(
-                token,
-                settings.SECRET_KEY,
-                algorithms = ['HS256']
-            )
+#         try:
+#             payload = jwt.decode(
+#                 token,
+#                 settings.SECRET_KEY,
+#                 algorithms = ['HS256']
+#             )
 
-            exp = payload.get('exp')
+#             exp = payload.get('exp')
 
-            if exp and datetime.now(timezone.utc).timestamp()> exp:
-                raise AuthenticationFailed('Token - expired')
+#             if exp and datetime.now(timezone.utc).timestamp()> exp:
+#                 raise AuthenticationFailed('Token - expired')
             
-            user_id = payload.get('user_id')
+#             user_id = payload.get('user_id')
 
-            if not user_id:
-                raise AuthenticationFailed('Invalid token: no user found')
-            try:
-                user = User.objects.get(id = user_id)
-            except User.DoesNotExist:
-                raise AuthenticationFailed('User not found')
+#             if not user_id:
+#                 raise AuthenticationFailed('Invalid token: no user found')
+#             try:
+#                 user = User.objects.get(id = user_id)
+#             except User.DoesNotExist:
+#                 raise AuthenticationFailed('User not found')
 
-            required_role = payload.get('role')
+#             required_role = payload.get('role')
 
-            if required_role not in settings.ALLOWED_ROLES:
-                raise AuthenticationFailed(f'Invalid role{required_role}')
+#             if required_role not in settings.ALLOWED_ROLES:
+#                 raise AuthenticationFailed(f'Invalid role{required_role}')
             
-            return (user, token)
-        except jwt.DecodeError:
-            raise AuthenticationFailed('Invallid token')
-        except jwt.InvalidTokenError:
-            raise AuthenticationFailed('Invalid token signature')
+#             return (user, token)
+#         except jwt.DecodeError:
+#             raise AuthenticationFailed('Invallid token')
+#         except jwt.InvalidTokenError:
+#             raise AuthenticationFailed('Invalid token signature')
         
-    def authenticate_header(self, request):
-        return 'Bearer realm="api"'
+    # def authenticate_header(self, request):
+    #     return 'Bearer realm="api"'
     
 
 class CustomJWTAuthentication(BaseAuthentication):

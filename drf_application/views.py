@@ -30,17 +30,17 @@ class CoinsDataViewSet(viewsets.ModelViewSet):
     filterset_fields = ['Name']
 
 
-class ObtainAuthToken(APIView):
-    permission_classes = [AllowAny]
+# class ObtainAuthToken(APIView):
+#     permission_classes = [AllowAny]
 
-    def post(self,request):
-        username = request.data.get('username')
-        password = request.data.get('password')
-        user = authenticate(username=username, password = password)
-        if user:
-            token, created = Token.objects.get_or_create(user = user)
-            return Response({'token':token.key})
-        return Response({'error':'Invalid credentials'},status = 400)
+#     def post(self,request):
+#         username = request.data.get('username')
+#         password = request.data.get('password')
+#         user = authenticate(username=username, password = password)
+#         if user:
+#             token, created = Token.objects.get_or_create(user = user)
+#             return Response({'token':token.key})
+#         return Response({'error':'Invalid credentials'},status = 400)
     
 
 class CustomObtainAuthToken(APIView):
