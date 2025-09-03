@@ -58,11 +58,7 @@ User = get_user_model()
     #     return 'Bearer realm="api"'
     
 
-class CustomJWTAuthentication(BaseAuthentication):
-    """
-    Кастомная JWT аутентификация для DRF.
-    Проверяет заголовок Authorization: Bearer <access_token>
-    """
+class CustomJWTAuthentication(BaseAuthentication): #Кастомная JWT аутент  для DRF
 
     def authenticate(self, request):
         auth_header = request.headers.get('Authorization')
