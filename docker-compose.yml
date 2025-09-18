@@ -1,0 +1,41 @@
+
+
+services:
+  web:
+    build: .
+    command: sh -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - ./:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+    restart: always
+  
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      - POSTGRES_DB=coins_data_1
+      - POSTGRES_USER=coin_user
+      - POSTGRES_PASSWORD=superparol2020
+
+  redis:
+    image: redis:7
+    restart: always
+    ports:
+      - "6379:6379"
+
+  celery-worker:
+    build: .
+    command: celery -A coin_analysis worker -l info
+    volumes:
+      - ./:/app
+    depends_on:
+      - redis
+    environment:
+      - CELERY_BROKEN_URL=redis://redis:6379/0
+      - CELERY_RESULTS_BACKEND=redis://redis:6379/0
+    restart: always
+

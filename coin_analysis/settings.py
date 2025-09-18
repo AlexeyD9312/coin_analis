@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
-
+import sys
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -105,11 +105,13 @@ WSGI_APPLICATION = 'coin_analysis.wsgi.application'
 
 DATABASES = {
     'default': {
+        #'ENGINE': 'django.db.backends.sqlite3', #from test
         'ENGINE': 'django.db.backends.postgresql',
+        #'NAME': 'memory', #from test
         'NAME': 'coins_data_1',
         'USER': 'coin_user',
         'PASSWORD': 'superparol2020',
-        'HOST': 'localhost',
+        'HOST': 'db',
         'PORT': '5432',
     }
 }
@@ -167,3 +169,6 @@ ALLOWED_ROLES = {
     "manager": ["update", "view"],
     "user": ["view"]
 }
+
+CELERY_BROKER_URL = 'redis://redis:6379/0'
+CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
